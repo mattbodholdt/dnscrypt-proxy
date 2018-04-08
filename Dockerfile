@@ -1,6 +1,13 @@
 FROM golang:latest
 
+RUN apt update && apt install -y \
+	dnsmasq \
+	dnsutils \
+	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ADD ./dnscrypt-proxy.toml /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+ADD ./dnsmasq.conf /etc/dnsmasq.conf
+ADD ./start.sh /etc/dnscrypt-proxy/start.sh
 
 RUN  git clone https://github.com/jedisct1/dnscrypt-proxy src && \
         cd src/dnscrypt-proxy && \
@@ -10,11 +17,13 @@ RUN  git clone https://github.com/jedisct1/dnscrypt-proxy src && \
 	cd .. && \
 	cp systemd/* $GOPATH/linux-amd64/ && \
 	cd .. && \
-	rm -rf ./src
-	
-EXPOSE 53 53/udp
-EXPOSE 53 53/tcp
+	rm -rf ./src && \
+	chmod a+x /etc/dnscrypt-proxy/start.sh
 
 WORKDIR "/etc/dnscrypt-proxy/"
 
-CMD ["/go/linux-amd64/dnscrypt-proxy","dnscrypt-proxy.toml"]
+CMD ["./start.sh"]
+
+HEALTHCHECK CMD dig @127.0.0.1 cloudflare.com || exit 1
+
+SHELL ["/bin/bash", "-c"]
