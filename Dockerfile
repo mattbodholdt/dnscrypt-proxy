@@ -11,6 +11,9 @@ RUN  git clone https://github.com/jedisct1/dnscrypt-proxy src && \
 	cp systemd/* $GOPATH/linux-amd64/ && \
 	cd .. && \
 	rm -rf ./src
+	
+EXPOSE 53 53/udp
+EXPOSE 53 53/tcp
 
 WORKDIR "/etc/dnscrypt-proxy/"
 
