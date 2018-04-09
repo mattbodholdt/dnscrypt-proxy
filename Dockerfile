@@ -24,6 +24,4 @@ WORKDIR "/etc/dnscrypt-proxy/"
 
 CMD ["./start.sh"]
 
-HEALTHCHECK CMD dig @127.0.0.1 cloudflare.com || exit 1
-
-SHELL ["/bin/bash", "-c"]
+HEALTHCHECK CMD dig @127.0.0.1 1.1.1.1 || exit 1
