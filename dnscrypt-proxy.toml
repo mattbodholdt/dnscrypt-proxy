@@ -114,7 +114,7 @@ fallback_resolver = '1.1.1.1:53'
 ## Never try to use the system DNS settings; unconditionally use the
 ## fallback resolver.
 
-ignore_system_dns = false
+ignore_system_dns = true
 
 
 ## Automatic log files rotation
