@@ -62,7 +62,7 @@ require_nofilter = false
 
 ## Always use TCP to connect to upstream servers
 
-force_tcp = false
+force_tcp = true
 
 
 ## How long a DNS query will wait for a response, in milliseconds
