@@ -1,8 +1,9 @@
-FROM golang:latest
+FROM golang:alpine
 
-RUN apt update && apt install -y \
-	dnsutils && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apk add --update bind-tools \
+		git && \
+	apk upgrade && \
+	rm -rf /var/cache/apk/*
 
 ADD ./dnscrypt-proxy.toml /etc/dnscrypt-proxy/dnscrypt-proxy.toml
 ADD ./start.sh /etc/dnscrypt-proxy/start.sh
