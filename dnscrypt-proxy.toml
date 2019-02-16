@@ -77,12 +77,12 @@ timeout = 2500
 
 ## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
 
-log_level = 5
+log_level = 2
 
 
 ## log file for the application
 
-log_file = 'dnscrypt-proxy.log'
+log_file = '/dev/stdout'
 
 
 ## Use the system logger (syslog on Unix, Event Log on Windows)
