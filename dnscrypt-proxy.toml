@@ -16,11 +16,17 @@
 ##################################
 
 ## List of servers to use
+##
+## Servers from the "public-resolvers" source (see down below) can
+## be viewed here: https://dnscrypt.info/public-servers
+##
 ## If this line is commented, all registered servers matching the require_* filters
-## will be used
+## will be used.
+##
 ## The proxy will automatically pick the fastest, working servers from the list.
 ## Remove the leading # first to enable this; lines starting with # are ignored.
 
+# server_names = ['scaleway-fr', 'google', 'yandex', 'cloudflare']
 server_names = ['cloudflare']
 
 ## List of local addresses and ports to listen to. Can be IPv4 and/or IPv6.
@@ -31,6 +37,14 @@ listen_addresses = ['0.0.0.0:53']
 ## Maximum number of simultaneous client connections to accept
 
 max_clients = 250
+
+## Switch to a different system user after listening sockets have been created.
+## Note (1): this feature is currently unsupported on Windows.
+## Note (2): this feature is not compatible with systemd socket activation.
+## Note (3): when using -pidfile, the PID file directory must be writable by the new user
+
+# user_name = 'nobody'
+
 
 ## Require servers (from static + remote sources) to satisfy specific properties
 
@@ -60,14 +74,43 @@ require_nofilter = false
 
 
 
-## Always use TCP to connect to upstream servers
+## Always use TCP to connect to upstream servers.
+## This can be useful if you need to route everything through Tor.
+## Otherwise, leave this to `false`, as it doesn't improve security
+## (dnscrypt-proxy will always encrypt everything even using UDP), and can
+## only increase latency.
 
 force_tcp = true
+
+
+## SOCKS proxy
+## Uncomment the following line to route all TCP connections to a local Tor node
+## Tor doesn't support UDP, so set `force_tcp` to `true` as well.
+
+# proxy = "socks5://127.0.0.1:9050"
+
+
+## HTTP/HTTPS proxy
+## Only for DoH servers
+
+# http_proxy = "http://127.0.0.1:8888"
 
 
 ## How long a DNS query will wait for a response, in milliseconds
 
 timeout = 2500
+
+
+## Keepalive for HTTP (HTTPS, HTTP/2) queries, in seconds
+
+keepalive = 30
+
+
+## Use the REFUSED return code for blocked responses
+## Setting this to `false` means that some responses will be lies.
+## Unfortunately, `false` appears to be required for Android 8+
+
+refused_code_in_responses = true
 
 
 ## Load-balancing strategy: 'p2' (default), 'ph', 'fastest' or 'random'
@@ -77,22 +120,50 @@ timeout = 2500
 
 ## Log level (0-6, default: 2 - 0 is very verbose, 6 only contains fatal errors)
 
-log_level = 2
+ log_level = 2
 
 
 ## log file for the application
 
-log_file = '/dev/stdout'
+ log_file = '/dev/stdout'
 
 
 ## Use the system logger (syslog on Unix, Event Log on Windows)
 
-use_syslog = true
+# use_syslog = true
 
 
 ## Delay, in minutes, after which certificates are reloaded
 
 cert_refresh_delay = 240
+
+
+## DNSCrypt: Create a new, unique key for every single DNS query
+## This may improve privacy but can also have a significant impact on CPU usage
+## Only enable if you don't have a lot of network load
+
+# dnscrypt_ephemeral_keys = false
+
+
+## DoH: Disable TLS session tickets - increases privacy but also latency
+
+# tls_disable_session_tickets = false
+
+
+## DoH: Use a specific cipher suite instead of the server preference
+## 49199 = TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+## 49195 = TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+## 52392 = TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+## 52393 = TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+##
+## On non-Intel CPUs such as MIPS routers and ARM systems (Android, Raspberry Pi...),
+## the following suite improves performance.
+## This may also help on Intel CPUs running 32-bit operating systems.
+##
+## Keep tls_cipher_suite empty if you have issues fetching sources or
+## connecting to some DoH servers. Google and Cloudflare are fine with it.
+
+# tls_cipher_suite = [52392, 49199]
 
 
 ## Fallback resolver
@@ -107,14 +178,31 @@ cert_refresh_delay = 240
 ## A resolver supporting DNSSEC is recommended. This may become mandatory.
 ##
 ## People in China may need to use 114.114.114.114:53 here.
+## Other popular options include 8.8.8.8 and 1.1.1.1.
 
 fallback_resolver = '1.1.1.1:53'
 
 
-## Never try to use the system DNS settings; unconditionally use the
-## fallback resolver.
+## Never let dnscrypt-proxy try to use the system DNS settings;
+## unconditionally use the fallback resolver.
 
 ignore_system_dns = true
+
+
+## Maximum time (in seconds) to wait for network connectivity before
+## initializing the proxy.
+## Useful if the proxy is automatically started at boot, and network
+## connectivity is not guaranteed to be immediately available.
+## Use 0 to disable.
+
+netprobe_timeout = 60
+
+
+## Offline mode - Do not use any remote encrypted servers.
+## The proxy will remain fully functional to respond to queries that
+## plugins can handle directly (forwarding, cloaking, ...)
+
+# offline_mode = false
 
 
 ## Automatic log files rotation
@@ -136,8 +224,9 @@ log_files_max_backups = 1
 
 ## Immediately respond to IPv6-related queries with an empty response
 ## This makes things faster when there is no IPv6 connectivity, but can
-## also cause reliability issues with some stub resolvers. In
-## particular, enabling this on macOS is not recommended.
+## also cause reliability issues with some stub resolvers.
+## Do not enable if you added a validating resolver such as dnsmasq in front
+## of the proxy.
 
 block_ipv6 = false
 
@@ -149,7 +238,7 @@ block_ipv6 = false
 
 ## Example map entries (one entry per line):
 ## example.com 9.9.9.9
-## example.net 9.9.9.9,8.8.8.8
+## example.net 9.9.9.9,8.8.8.8,1.1.1.1
 
 # forwarding_rules = 'forwarding-rules.txt'
 
@@ -182,7 +271,7 @@ cache = true
 
 ## Cache size
 
-cache_size = 256
+cache_size = 512
 
 
 ## Minimum TTL for cached entries
@@ -195,9 +284,14 @@ cache_min_ttl = 600
 cache_max_ttl = 86400
 
 
-## TTL for negatively cached entries
+## Minimum TTL for negatively cached entries
 
-cache_neg_ttl = 60
+cache_neg_min_ttl = 60
+
+
+## Maximum TTL for negatively cached entries
+
+cache_neg_max_ttl = 600
 
 
 
@@ -253,6 +347,7 @@ cache_neg_ttl = 60
 ## Blacklists are made of one pattern per line. Example of valid patterns:
 ##
 ##   example.com
+##   =example.com
 ##   *sex*
 ##   ads.*
 ##   ads*.example.*
@@ -308,6 +403,34 @@ cache_neg_ttl = 60
 
 
 
+######################################################
+#   Pattern-based whitelisting (blacklists bypass)   #
+######################################################
+
+## Whitelists support the same patterns as blacklists
+## If a name matches a whitelist entry, the corresponding session
+## will bypass names and IP filters.
+##
+## Time-based rules are also supported to make some websites only accessible at specific times of the day.
+
+[whitelist]
+
+  ## Path to the file of whitelisting rules (absolute, or relative to the same directory as the executable file)
+
+  # whitelist_file = 'whitelist.txt'
+
+
+  ## Optional path to a file logging whitelisted queries
+
+  # log_file = 'whitelisted.log'
+
+
+  ## Optional log format: tsv or ltsv (default: tsv)
+
+  # log_format = 'tsv'
+
+
+
 ##########################################
 #        Time access restrictions        #
 ##########################################
@@ -318,7 +441,7 @@ cache_neg_ttl = 60
 ##
 ## For example, the following rule in a blacklist file:
 ## *.youtube.* @time-to-sleep
-## would block access to Youtube only during the days, and period of the days
+## would block access to YouTube only during the days, and period of the days
 ## define by the 'time-to-sleep' schedule.
 ##
 ## {after='21:00', before= '7:00'} matches 0:00-7:00 and 21:00-0:00
@@ -373,6 +496,15 @@ cache_neg_ttl = 60
   minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
   refresh_delay = 72
   prefix = ''
+
+  ## Quad9 over DNSCrypt - https://quad9.net/
+
+  # [sources.quad9-resolvers]
+  # urls = ["https://www.quad9.net/quad9-resolvers.md"]
+  # minisign_key = "RWQBphd2+f6eiAqBsvDZEBXBGHQBJfeG6G+wJPPKxCZMoEQYpmoysKUN"
+  # cache_file = "quad9-resolvers.md"
+  # refresh_delay = 72
+  # prefix = "quad9-"
 
   ## Another example source, with resolvers censoring some websites not appropriate for children
   ## This is a subset of the `public-resolvers` list, so enabling both is useless
