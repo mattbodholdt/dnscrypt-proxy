@@ -7,22 +7,20 @@ RUN apk add --update bind-tools curl git && \
 ADD dnscrypt-proxy.toml /etc/dnscrypt-proxy/dnscrypt-proxy.toml
 ADD test.sh /etc/dnscrypt-proxy/test.sh
 
-ARG ARCH
-
 RUN case $(uname -m) in 				\
-	armv71)						\
+	armv7l)						\
 		ARCH=arm				\
 	;;						\
-	amd64)						\
+	amd64|x86_64)					\
 		ARCH=x86_64				\
 	;;						\
 	*)						\
-		echo "Unhandled arch!  Please report!"	\
+		echo "Unhandled arch $(uname -m)!  Please report!" \
 		ARCH=unknown				\
 	;;						\
-	esac
-
-RUN curl --silent -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/2.0.25/dnscrypt-proxy-linux_${ARCH}-2.0.25.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
+	esac;						\
+	echo "Installing dnscrypt-proxy for ${ARCH}";	\
+	curl --silent -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/2.0.25/dnscrypt-proxy-linux_${ARCH}-2.0.25.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	tar -xzf dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	mv linux-${ARCH}/dnscrypt-proxy $GOPATH/bin/dnscrypt-proxy && \
 	rm -rf dnscrypt-proxy-linux_${ARCH}.tar.gz linux-${ARCH}
