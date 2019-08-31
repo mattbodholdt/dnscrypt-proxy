@@ -1,7 +1,5 @@
 # DNSCrypt-Proxy
 
-Forked from mattbodholdt/dnscrypt-proxy to build on arm32v7 (Raspberry Pi 3).
-
 A DNS server container which consumes Cloudflare's DNS over HTTPS resolution service (https://developers.cloudflare.com/1.1.1.1/dns-over-https/, https://1.1.1.1) by utilizing DNSCrypt Proxy (https://github.com/jedisct1/dnscrypt-proxy, https://dnscrypt.info/).
 
 In this config, tcp and udp port 53 must be free on the host:
