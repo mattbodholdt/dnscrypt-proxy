@@ -19,7 +19,7 @@ RUN case $(uname -m) in 				\
 		ARCH=unknown				\
 	;;						\
 	esac;						\
-	VER=2.0.25;					\
+	VER=2.0.26;					\
 	echo "Installing dnscrypt-proxy-${VER} for ${ARCH}";	\
 	curl --silent -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	tar -xzf dnscrypt-proxy-linux_${ARCH}.tar.gz && \
