@@ -11,6 +11,9 @@ RUN case $(uname -m) in 				\
 	armv7l)						\
 		ARCH=arm				\
 	;;						\
+	aarch64)					\
+		ARCH=arm64				\
+	;;						\
 	amd64|x86_64)					\
 		ARCH=x86_64				\
 	;;						\
