@@ -11,7 +11,7 @@ RUN case $(uname -m) in 				\
 	armv7l)						\
 		ARCH=arm				\
 	;;						\
-	aarch64)					\
+	arm64|aarch64)					\
 		ARCH=arm64				\
 	;;						\
 	amd64|x86_64)					\
@@ -22,7 +22,7 @@ RUN case $(uname -m) in 				\
 		ARCH=unknown				\
 	;;						\
 	esac;						\
-	VER=2.0.26;					\
+	VER=2.0.27;					\
 	echo "Installing dnscrypt-proxy-${VER} for ${ARCH}";	\
 	curl --silent -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	tar -xzf dnscrypt-proxy-linux_${ARCH}.tar.gz && \
