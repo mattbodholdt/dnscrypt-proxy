@@ -1,6 +1,6 @@
 FROM golang:alpine
 
-ARG VER=2.0.28
+ARG VER=2.0.36
 
 RUN apk add --update bind-tools curl && \
 	rm -rf /var/cache/apk/*
