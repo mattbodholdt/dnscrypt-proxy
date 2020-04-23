@@ -293,7 +293,6 @@ block_undelegated = true
 reject_ttl = 600
 
 
-
 ##################################################################################
 #        Route queries for specific domains to a dedicated set of servers        #
 ##################################################################################
