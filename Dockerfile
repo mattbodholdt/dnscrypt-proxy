@@ -1,8 +1,6 @@
 FROM golang:alpine
 
-ARG VER=2.0.28
-
-RUN apk add --update bind-tools curl && \
+RUN apk add --update bind-tools curl jq && \
 	rm -rf /var/cache/apk/*
 
 ADD dnscrypt-proxy.toml /etc/dnscrypt-proxy/dnscrypt-proxy.toml
@@ -23,8 +21,9 @@ RUN case $(uname -m) in 				\
 		ARCH=unknown				\
 	;;						\
 	esac;						\
-	echo "Fetching dnscrypt-proxy-${VER} for ${ARCH}";	\
-	curl --silent -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
+	echo "Fetching dnscrypt-proxy-latest for ${ARCH}" && \
+	VER=$(curl -sL https://api.github.com/repos/jedisct1/dnscrypt-proxy/releases/latest | jq -j .name) && \
+	curl -s -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	tar -xzf dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	mv linux-${ARCH}/dnscrypt-proxy $GOPATH/bin/dnscrypt-proxy && \
 	rm -rf dnscrypt-proxy-linux_${ARCH}.tar.gz linux-${ARCH}
