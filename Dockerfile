@@ -22,7 +22,7 @@ RUN case $(uname -m) in \
 	;;					\
 	esac;				\
 	echo "Fetching dnscrypt-proxy-latest for ${ARCH}" && \
-	VER=$(curl -sL https://api.github.com/repos/jedisct1/dnscrypt-proxy/releases/latest | jq -j .name) && \
+	VER=$(curl -sL https://api.github.com/repos/jedisct1/dnscrypt-proxy/releases/latest | jq -j .tag_name) && \
 	curl -s -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	tar -xzf dnscrypt-proxy-linux_${ARCH}.tar.gz && \
 	mv linux-${ARCH}/dnscrypt-proxy $GOPATH/bin/dnscrypt-proxy && \
