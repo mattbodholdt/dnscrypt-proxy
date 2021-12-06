@@ -7,20 +7,20 @@ ADD dnscrypt-proxy.toml /etc/dnscrypt-proxy/dnscrypt-proxy.toml
 ADD test.sh /etc/dnscrypt-proxy/test.sh
 
 RUN case $(uname -m) in \
-	armv7l)				\
-		ARCH=arm		\
-	;;					\
-	arm64|aarch64)		\
-		ARCH=arm64		\
-	;;					\
-	amd64|x86_64)		\
-		ARCH=x86_64		\
-	;;					\
-	*)					\
+	armv7l) \
+		ARCH=arm \
+	;; \
+	arm64|aarch64) \
+		ARCH=arm64 \
+	;; \
+	amd64|x86_64) \
+		ARCH=x86_64 \
+	;; \
+	*) \
 		echo "Unhandled arch $(uname -m)!  Please report!" \
-		ARCH=unknown	\
-	;;					\
-	esac;				\
+		ARCH=unknown \
+	;; \
+	esac; \
 	echo "Fetching dnscrypt-proxy-latest for ${ARCH}" && \
 	VER=$(curl -sL https://api.github.com/repos/jedisct1/dnscrypt-proxy/releases/latest | jq -j .tag_name) && \
 	curl -s -L https://github.com/jedisct1/dnscrypt-proxy/releases/download/${VER}/dnscrypt-proxy-linux_${ARCH}-${VER}.tar.gz > dnscrypt-proxy-linux_${ARCH}.tar.gz && \
